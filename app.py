@@ -6,6 +6,10 @@ import hashlib
 import requests
 import fal_client
 from flask import Flask, request, jsonify, send_from_directory
+      
+# Read API keys
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 openai.api_key = os.environ.get("OPENAI_API_KEY")
@@ -74,8 +78,11 @@ def generate():
         "fal-ai/flux/schnell",
         arguments={
             "prompt": prompt,
-            "image_size": "landscape_4_3",
-            "num_inference_steps": 4,
+            "image_size":  {
+                "width": 150,
+                "height": 150
+            },
+            "num_inference_steps": 2,
             "num_images": 1,
             "enable_safety_checker": True
         },

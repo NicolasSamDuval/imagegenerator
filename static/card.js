@@ -9,10 +9,12 @@ export class Card {
         this.buttonHeight = 30;    // Buttons area height.
         this.width = 150;          // Card width (same as image width).
         this.height = this.imageSize + this.buttonHeight;
+        this.image = new Image();
+        this.image.src = "image.png";
     }
     
     // Draw the card onto the provided context.
-    draw(ctx, baseImage) {
+    draw(ctx) {
         ctx.save();
         ctx.translate(this.x, this.y);
         
@@ -23,7 +25,7 @@ export class Card {
         ctx.strokeRect(0, 0, this.width, this.height);
         
         // Draw the image area.
-        ctx.drawImage(baseImage, 0, 0, this.imageSize, this.imageSize);
+        ctx.drawImage(this.image, 0, 0, this.imageSize, this.imageSize);
         
         // Draw the buttons area (the bottom part).
         ctx.fillStyle = "#ddd";

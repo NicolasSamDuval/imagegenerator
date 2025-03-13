@@ -6,9 +6,8 @@ const ctx = canvas.getContext("2d");
 // Global array of cards.
 let cards = [];
 
-// Load a base image (shared by all cards).
-const baseImage = new Image();
-baseImage.src = "image.png"; // Ensure this image is available in your project.
+// Global variable to track the selected card.
+let selectedCard = null;
 
 // Global variables for dragging.
 let draggingCard = null;
@@ -25,6 +24,9 @@ canvas.addEventListener("mousedown", (e) => {
     for (let i = cards.length - 1; i >= 0; i--) {
         let card = cards[i];
         if (card.isInside(mx, my)) {
+            // Mark this card as selected.
+            selectedCard = card;
+            
             // Check if a button was clicked.
             let button = card.buttonAt(mx, my);
             if (button) {
@@ -87,25 +89,78 @@ canvas.addEventListener("mouseleave", () => {
 function redraw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     cards.forEach(card => {
-        card.draw(ctx, baseImage);
+        card.draw(ctx);
     });
 }
+
+// Init
+const baseImage = new Image();
+baseImage.src = "image.png"; 
 
 // Create an initial card when the base image is loaded.
 baseImage.onload = () => {
     if (cards.length === 0) {
-        cards.push(new Card(100, 100));
+        const card = new Card(100, 100);
+        selectedCard = card;
+        cards.push(card);
         redraw();
     }
 };
 
-
-////// TEST
+// ------ TEST ------
 
 import { generatePromptVariations, generateImage } from './imagegenerator.js';
 
 const promptInput = document.getElementById("prompt-input");
 const generateBtn = document.getElementById("generate-btn");
+
+// Listen for clicks on the generate button.
+generateBtn.addEventListener("click", () => {
+    // Retrieve the prompt entered by the user.
+    const promptText = promptInput.value.trim();
+    if (!promptText) return;
+    
+    // Generate a new image based on the prompt.
+    generateImage(promptText).then(generatedImage => {
+        // If a card is selected, update its image source.
+        if (selectedCard) {
+            selectedCard.image.src = `/images/${generatedImage}`;
+            // Redraw once the card's image is loaded.
+            selectedCard.image.onload = () => {
+                redraw();
+            }
+        } else {
+            console.warn("No card is selected to update.");
+        }
+    }).catch(err => {
+        console.error("Error generating image:", err);
+    });
+});
+
+// generateBtn.addEventListener("click", async () => {
+//     const promptText = promptInput.value.trim();
+//     if (!promptText) return;
+    
+//     try {
+//         const filename = await generateImage(promptText);
+//         // Create a new div container for the image
+//         const imageContainer = document.createElement("div");
+//         imageContainer.style.marginTop = "20px"; // optional styling
+        
+//         // Create an img element and set its source to the generated image URL
+//         const img = document.createElement("img");
+//         img.src = `/images/${filename}`; // ensure your server serves static files from /images
+//         img.alt = "Generated Image";
+//         img.style.maxWidth = "100%"; // optional styling
+        
+//         // Append the image to the container and the container to the body (or any specific element)
+//         imageContainer.appendChild(img);
+//         document.body.appendChild(imageContainer);
+//     } catch (error) {
+//         console.error("Error generating image:", error);
+//     }
+// });
+
 
 // generateBtn.addEventListener("click", async () => {
 //     const promptText = promptInput.value.trim();
@@ -119,26 +174,4 @@ const generateBtn = document.getElementById("generate-btn");
 //     }
 // });
 
-generateBtn.addEventListener("click", async () => {
-    const promptText = promptInput.value.trim();
-    if (!promptText) return;
-    
-    try {
-        const filename = await generateImage(promptText);
-        // Create a new div container for the image
-        const imageContainer = document.createElement("div");
-        imageContainer.style.marginTop = "20px"; // optional styling
-        
-        // Create an img element and set its source to the generated image URL
-        const img = document.createElement("img");
-        img.src = `/images/${filename}`; // ensure your server serves static files from /images
-        img.alt = "Generated Image";
-        img.style.maxWidth = "100%"; // optional styling
-        
-        // Append the image to the container and the container to the body (or any specific element)
-        imageContainer.appendChild(img);
-        document.body.appendChild(imageContainer);
-    } catch (error) {
-        console.error("Error generating image:", error);
-    }
-});
+
