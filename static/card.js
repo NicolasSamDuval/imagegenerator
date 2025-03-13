@@ -5,10 +5,10 @@ export class Card {
         this.x = x;
         this.y = y;
         // Card layout dimensions.
-        this.imageSize = 150;      // Image drawn as a 150x150 square.
+        this.imageSize = 144;      // Image drawn as a 144x144 square.
         this.buttonHeight = 30;    // Buttons area height.
-        this.width = 150;          // Card width (same as image width).
-        this.height = this.imageSize + this.buttonHeight;
+        this.width = 144;          // Card width (same as image width).
+        this.height = 144;
         this.image = new Image();
         this.image.src = "image.png";
     }

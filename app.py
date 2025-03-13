@@ -79,8 +79,8 @@ def generate():
         arguments={
             "prompt": prompt,
             "image_size":  {
-                "width": 150,
-                "height": 150
+                "width": 144,
+                "height": 144
             },
             "num_inference_steps": 2,
             "num_images": 1,
