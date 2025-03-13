@@ -8,7 +8,7 @@ export class Card {
         this.imageSize = 144;      // Image drawn as a 144x144 square.
         this.buttonHeight = 30;    // Buttons area height.
         this.width = 144;          // Card width (same as image width).
-        this.height = 144;
+        this.height = this.imageSize + this.buttonHeight;
         this.image = new Image();
         this.image.src = "image.png";
     }
