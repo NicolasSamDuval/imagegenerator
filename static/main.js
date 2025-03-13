@@ -102,20 +102,43 @@ baseImage.onload = () => {
 
 ////// TEST
 
-import { generatePromptVariations } from './imagegenerator.js';
+import { generatePromptVariations, generateImage } from './imagegenerator.js';
 
 const promptInput = document.getElementById("prompt-input");
 const generateBtn = document.getElementById("generate-btn");
+
+// generateBtn.addEventListener("click", async () => {
+//     const promptText = promptInput.value.trim();
+//     if (!promptText) return;
+    
+//     try {
+//         const variations = await generatePromptVariations(promptText);
+//         console.log("Generated Variations:", variations);
+//     } catch (error) {
+//         console.error("Error generating variations:", error);
+//     }
+// });
 
 generateBtn.addEventListener("click", async () => {
     const promptText = promptInput.value.trim();
     if (!promptText) return;
     
     try {
-        const variations = await generatePromptVariations(promptText);
-        console.log("Generated Variations:", variations);
+        const filename = await generateImage(promptText);
+        // Create a new div container for the image
+        const imageContainer = document.createElement("div");
+        imageContainer.style.marginTop = "20px"; // optional styling
+        
+        // Create an img element and set its source to the generated image URL
+        const img = document.createElement("img");
+        img.src = `/images/${filename}`; // ensure your server serves static files from /images
+        img.alt = "Generated Image";
+        img.style.maxWidth = "100%"; // optional styling
+        
+        // Append the image to the container and the container to the body (or any specific element)
+        imageContainer.appendChild(img);
+        document.body.appendChild(imageContainer);
     } catch (error) {
-        console.error("Error generating variations:", error);
+        console.error("Error generating image:", error);
     }
 });
-

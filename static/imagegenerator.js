@@ -1,3 +1,27 @@
+// Generate Image
+export async function generateImage(prompt) {
+    return fetch('/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: prompt })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Image generation failed');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // data.filename is something like "hash.jpg"
+        return data.filename;
+    })
+    .catch(error => {
+        console.error('Error generating image:', error);
+        throw error;
+    });
+}
 
 // Prompt variations
 export async function generatePromptVariations(userPrompt) {
