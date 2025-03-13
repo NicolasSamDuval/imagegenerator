@@ -15,7 +15,7 @@ let dragOffsetX = 0;
 let dragOffsetY = 0;
 
 // --- Event Handling ---
-canvas.addEventListener("mousedown", (e) => {
+canvas.addEventListener("mousedown", async (e) => {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
@@ -42,14 +42,42 @@ canvas.addEventListener("mousedown", (e) => {
                     redraw();
                     return;
                 } else if (button === "expand") {
+                    // Prepare 4 prompt variations
+                    const prompt = selectedCard.prompt;
+                    const variations = await generatePromptVariations(prompt);
+
                     // Expand: create four new cards around this card.
                     const offset = 10;
+                    let newCards = [];
                     let topCard = new Card(card.x, card.y - card.height - offset);
                     let bottomCard = new Card(card.x, card.y + card.height + offset);
                     let leftCard = new Card(card.x - card.width - offset, card.y);
                     let rightCard = new Card(card.x + card.width + offset, card.y);
                     cards.push(topCard, bottomCard, leftCard, rightCard);
+                    newCards.push(topCard, bottomCard, leftCard, rightCard);
                     redraw();
+
+                    // Generate 4 new images
+                    for (let i = 0 ; i < newCards.length; i++) {
+                        const card = newCards[i];
+                        const variation = variations[i+1];
+                        generateImage(variation).then(generatedImage => {
+                            // If a card is selected, update its image source.
+                            if (card) {
+                                card.image.src = `/images/${generatedImage}`;
+                                // Redraw once the card's image is loaded.
+                                card.image.onload = () => {
+                                    redraw();
+                                }
+                                card.prompt = variation;
+                            } else {
+                                console.error("Card not valid.");
+                            }
+                        }).catch(err => {
+                            console.error("Error generating image:", err);
+                        });
+                    }
+
                     return;
                 }
             }
@@ -129,6 +157,7 @@ generateBtn.addEventListener("click", () => {
             selectedCard.image.onload = () => {
                 redraw();
             }
+            selectedCard.prompt = promptText;
         } else {
             console.warn("No card is selected to update.");
         }
@@ -136,42 +165,5 @@ generateBtn.addEventListener("click", () => {
         console.error("Error generating image:", err);
     });
 });
-
-// generateBtn.addEventListener("click", async () => {
-//     const promptText = promptInput.value.trim();
-//     if (!promptText) return;
-    
-//     try {
-//         const filename = await generateImage(promptText);
-//         // Create a new div container for the image
-//         const imageContainer = document.createElement("div");
-//         imageContainer.style.marginTop = "20px"; // optional styling
-        
-//         // Create an img element and set its source to the generated image URL
-//         const img = document.createElement("img");
-//         img.src = `/images/${filename}`; // ensure your server serves static files from /images
-//         img.alt = "Generated Image";
-//         img.style.maxWidth = "100%"; // optional styling
-        
-//         // Append the image to the container and the container to the body (or any specific element)
-//         imageContainer.appendChild(img);
-//         document.body.appendChild(imageContainer);
-//     } catch (error) {
-//         console.error("Error generating image:", error);
-//     }
-// });
-
-
-// generateBtn.addEventListener("click", async () => {
-//     const promptText = promptInput.value.trim();
-//     if (!promptText) return;
-    
-//     try {
-//         const variations = await generatePromptVariations(promptText);
-//         console.log("Generated Variations:", variations);
-//     } catch (error) {
-//         console.error("Error generating variations:", error);
-//     }
-// });
 
 

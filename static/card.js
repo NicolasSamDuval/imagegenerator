@@ -11,6 +11,7 @@ export class Card {
         this.height = this.imageSize + this.buttonHeight;
         this.image = new Image();
         this.image.src = "image.png";
+        this.prompt = '';
     }
     
     // Draw the card onto the provided context.
