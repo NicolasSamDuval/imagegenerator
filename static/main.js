@@ -1,10 +1,11 @@
 import { Card } from './card.js';
+import { saveProject } from './project.js';
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 // Global array of cards.
-let cards = [];
+export let cards = [];
 
 // Global variable to track the selected card.
 let selectedCard = null;
@@ -79,6 +80,9 @@ canvas.addEventListener("mousedown", async (e) => {
                         });
                     }
 
+                    // Save project
+                    saveProject();
+
                     return;
                 }
             }
@@ -141,6 +145,8 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mouseup", () => {
     draggingCard = null;
+    // Save project on mouse up
+    saveProject();
 });
 
 canvas.addEventListener("mouseleave", () => {
@@ -178,10 +184,13 @@ rearrangeButton.addEventListener('click', () => {
     
     // Re-render the canvas with updated card positions
     redraw();
+
+    // Save project
+    saveProject();
 });
 
 // Redraw the entire canvas.
-function redraw() {
+export function redraw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     cards.forEach(card => {
         card.draw(ctx);
@@ -224,6 +233,9 @@ generateBtn.addEventListener("click", () => {
                 redraw();
             }
             selectedCard.prompt = promptText;
+
+            // Save project
+            saveProject();
         } else {
             console.warn("No card is selected to update.");
         }

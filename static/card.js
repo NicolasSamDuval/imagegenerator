@@ -15,6 +15,12 @@ export class Card {
         this.creationDate = new Date();
     }
 
+    update(src, prompt, creationDate) {
+        this.image.src = src;
+        this.prompt = prompt;
+        this.creationDate = creationDate;
+    }
+
     clone() {
         // Create a new card with position shifted 
         const newCard = new Card(this.x + 20, this.y + 20);
