@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Canvas Card Manipulation</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas Card Manipulation</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <canvas id="canvas" width="1000" height="1000"></canvas>
-  <script type="module" src="main.js"></script>
+    <canvas id="canvas" width="1000" height="1000"></canvas>
+    
+    <!-- Prompt container underneath the canvas -->
+    <div id="prompt-container">
+        <input type="text" id="prompt-input" placeholder="Enter image prompt" />
+        <button id="generate-btn">Generate Variations</button>
+        <div id="variations"></div>
+    </div>
+    
+    <script type="module" src="main.js"></script>
 </body>
 </html>

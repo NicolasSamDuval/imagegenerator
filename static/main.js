@@ -17,84 +17,105 @@ let dragOffsetY = 0;
 
 // --- Event Handling ---
 canvas.addEventListener("mousedown", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-
-  // Iterate in reverse order (topmost card first).
-  for (let i = cards.length - 1; i >= 0; i--) {
-    let card = cards[i];
-    if (card.isInside(mx, my)) {
-      // Check if a button was clicked.
-      let button = card.buttonAt(mx, my);
-      if (button) {
-        if (button === "duplicate") {
-          // Duplicate the card by creating a new one with a slight offset.
-          let newCard = new Card(card.x + 20, card.y + 20);
-          cards.push(newCard);
-          redraw();
-          return;
-        } else if (button === "remove") {
-          // Remove this card.
-          cards.splice(i, 1);
-          redraw();
-          return;
-        } else if (button === "expand") {
-          // Expand: create four new cards around this card.
-          const offset = 10;
-          let topCard = new Card(card.x, card.y - card.height - offset);
-          let bottomCard = new Card(card.x, card.y + card.height + offset);
-          let leftCard = new Card(card.x - card.width - offset, card.y);
-          let rightCard = new Card(card.x + card.width + offset, card.y);
-          cards.push(topCard, bottomCard, leftCard, rightCard);
-          redraw();
-          return;
-        }
-      }
-      // Otherwise, start dragging this card.
-      draggingCard = card;
-      dragOffsetX = mx - card.x;
-      dragOffsetY = my - card.y;
-      // Bring this card to the front.
-      cards.splice(i, 1);
-      cards.push(card);
-      redraw();
-      return;
-    }
-  }
-});
-
-canvas.addEventListener("mousemove", (e) => {
-  if (draggingCard) {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
-    draggingCard.x = mx - dragOffsetX;
-    draggingCard.y = my - dragOffsetY;
-    redraw();
-  }
+    
+    // Iterate in reverse order (topmost card first).
+    for (let i = cards.length - 1; i >= 0; i--) {
+        let card = cards[i];
+        if (card.isInside(mx, my)) {
+            // Check if a button was clicked.
+            let button = card.buttonAt(mx, my);
+            if (button) {
+                if (button === "duplicate") {
+                    // Duplicate the card by creating a new one with a slight offset.
+                    let newCard = new Card(card.x + 20, card.y + 20);
+                    cards.push(newCard);
+                    redraw();
+                    return;
+                } else if (button === "remove") {
+                    // Remove this card.
+                    cards.splice(i, 1);
+                    redraw();
+                    return;
+                } else if (button === "expand") {
+                    // Expand: create four new cards around this card.
+                    const offset = 10;
+                    let topCard = new Card(card.x, card.y - card.height - offset);
+                    let bottomCard = new Card(card.x, card.y + card.height + offset);
+                    let leftCard = new Card(card.x - card.width - offset, card.y);
+                    let rightCard = new Card(card.x + card.width + offset, card.y);
+                    cards.push(topCard, bottomCard, leftCard, rightCard);
+                    redraw();
+                    return;
+                }
+            }
+            // Otherwise, start dragging this card.
+            draggingCard = card;
+            dragOffsetX = mx - card.x;
+            dragOffsetY = my - card.y;
+            // Bring this card to the front.
+            cards.splice(i, 1);
+            cards.push(card);
+            redraw();
+            return;
+        }
+    }
+});
+
+canvas.addEventListener("mousemove", (e) => {
+    if (draggingCard) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        draggingCard.x = mx - dragOffsetX;
+        draggingCard.y = my - dragOffsetY;
+        redraw();
+    }
 });
 
 canvas.addEventListener("mouseup", () => {
-  draggingCard = null;
+    draggingCard = null;
 });
 
 canvas.addEventListener("mouseleave", () => {
-  draggingCard = null;
+    draggingCard = null;
 });
 
 // Redraw the entire canvas.
 function redraw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  cards.forEach(card => {
-    card.draw(ctx, baseImage);
-  });
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    cards.forEach(card => {
+        card.draw(ctx, baseImage);
+    });
 }
 
 // Create an initial card when the base image is loaded.
 baseImage.onload = () => {
-  if (cards.length === 0) {
-    cards.push(new Card(100, 100));
-    redraw();
-  }
+    if (cards.length === 0) {
+        cards.push(new Card(100, 100));
+        redraw();
+    }
 };
+
+
+////// TEST
+
+import { generatePromptVariations } from './imagegenerator.js';
+
+const promptInput = document.getElementById("prompt-input");
+const generateBtn = document.getElementById("generate-btn");
+
+generateBtn.addEventListener("click", async () => {
+    const promptText = promptInput.value.trim();
+    if (!promptText) return;
+    
+    try {
+        const variations = await generatePromptVariations(promptText);
+        console.log("Generated Variations:", variations);
+    } catch (error) {
+        console.error("Error generating variations:", error);
+    }
+});
+

@@ -2,6 +2,7 @@ body {
     margin: 0;
     padding: 0;
     background: #f5f5f5;
+    font-family: sans-serif;
 }
 
 canvas {
@@ -9,4 +10,28 @@ canvas {
     display: block;
     margin: 20px auto;
     background: #eee;
+}
+
+/* Styling for the prompt container */
+#prompt-container {
+    width: 1000px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+#prompt-container input {
+    width: 60%;
+    padding: 10px;
+    font-size: 16px;
+}
+
+#prompt-container button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+#variations {
+    margin-top: 15px;
+    text-align: left;
 }

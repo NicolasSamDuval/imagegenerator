@@ -3,7 +3,7 @@
 ## Install env
 ```
 env.sh
-pip install flask
+pip install flask openai
 ```
 
 ## Run app
