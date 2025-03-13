@@ -12,6 +12,18 @@ export class Card {
         this.image = new Image();
         this.image.src = "image.png";
         this.prompt = '';
+        this.creationDate = new Date();
+    }
+
+    clone() {
+        // Create a new card with position shifted 
+        const newCard = new Card(this.x + 20, this.y + 20);
+        // Create a new image instance with the same source.
+        newCard.image = new Image();
+        newCard.image.src = this.image.src;
+        // Copy over the prompt.
+        newCard.prompt = this.prompt;
+        return newCard;
     }
     
     // Draw the card onto the provided context.

@@ -32,7 +32,8 @@ canvas.addEventListener("mousedown", async (e) => {
             if (button) {
                 if (button === "duplicate") {
                     // Duplicate the card by creating a new one with a slight offset.
-                    let newCard = new Card(card.x + 20, card.y + 20);
+                    //let newCard = new Card(card.x + 20, card.y + 20);
+                    let newCard = card.clone();
                     cards.push(newCard);
                     redraw();
                     return;
