@@ -35,3 +35,7 @@ canvas {
     margin-top: 15px;
     text-align: left;
 }
+
+#tooltip {
+    max-width: 500px;
+}

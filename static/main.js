@@ -103,6 +103,39 @@ canvas.addEventListener("mousemove", (e) => {
         draggingCard.y = my - dragOffsetY;
         redraw();
     }
+
+    // Hover logic
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    // If dragging, update the dragged card position.
+    if (draggingCard) {
+        draggingCard.x = mx - dragOffsetX;
+        draggingCard.y = my - dragOffsetY;
+        redraw();
+    }
+
+    // Check if mouse is over a card (topmost first)
+    let hoveredCard = null;
+    for (let i = cards.length - 1; i >= 0; i--) {
+        if (cards[i].isInside(mx, my)) {
+            hoveredCard = cards[i];
+            break;
+        }
+    }
+
+    // Update tooltip element based on hovered card.
+    const tooltip = document.getElementById("tooltip");
+    if (hoveredCard && hoveredCard.prompt) {
+        tooltip.style.display = "block";
+        tooltip.innerText = hoveredCard.prompt;
+        // Position tooltip near the mouse pointer.
+        tooltip.style.left = e.pageX + 10 + "px";
+        tooltip.style.top = e.pageY + 10 + "px";
+    } else {
+        tooltip.style.display = "none";
+    }
 });
 
 canvas.addEventListener("mouseup", () => {
@@ -111,6 +144,39 @@ canvas.addEventListener("mouseup", () => {
 
 canvas.addEventListener("mouseleave", () => {
     draggingCard = null;
+});
+
+// Rearrange logic
+const rearrangeButton = document.getElementById('rearrange-btn');
+const margin = 10; // spacing between cards
+
+rearrangeButton.addEventListener('click', () => {
+    // Sort cards by creation date (adjust sort order as needed)
+    cards.sort((a, b) => a.creationDate - b.creationDate);
+    
+    // Initialize starting position at the bottom left of the canvas
+    let x = 0;
+    // Assuming all cards have the same height; otherwise, you may need to compute the row height dynamically.
+    let cardHeight = cards.length > 0 ? cards[0].height : 0;
+    let y = canvas.height - cardHeight;
+    
+    // Loop through sorted cards and assign new positions
+    cards.forEach(card => {
+        card.x = x;
+        card.y = y;
+        
+        // Move to the right for the next card
+        x += card.width + margin;
+        
+        // If the next card would go off the canvas, reset x and move y one row up
+        if (x + card.width > canvas.width) {
+            x = 0;
+            y -= card.height + margin;
+        }
+    });
+    
+    // Re-render the canvas with updated card positions
+    redraw();
 });
 
 // Redraw the entire canvas.
@@ -135,7 +201,6 @@ baseImage.onload = () => {
     }
 };
 
-// ------ TEST ------
 
 import { generatePromptVariations, generateImage } from './imagegenerator.js';
 
