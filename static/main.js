@@ -8,7 +8,10 @@ const ctx = canvas.getContext("2d");
 export let cards = [];
 
 // Global variable to track the selected card.
-let selectedCard = null;
+export let selectedCard = null;
+export function setSelectedCard(card) {
+    selectedCard = card;
+}
 
 // Global variables for dragging.
 let draggingCard = null;
@@ -196,20 +199,6 @@ export function redraw() {
         card.draw(ctx);
     });
 }
-
-// Init
-const baseImage = new Image();
-baseImage.src = "image.png"; 
-
-// Create an initial card when the base image is loaded.
-baseImage.onload = () => {
-    if (cards.length === 0) {
-        const card = new Card(100, 100);
-        selectedCard = card;
-        cards.push(card);
-        redraw();
-    }
-};
 
 
 import { generatePromptVariations, generateImage } from './imagegenerator.js';

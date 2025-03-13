@@ -1,5 +1,5 @@
 import { Card } from './card.js';
-import { redraw, cards } from './main.js'
+import { redraw, cards, setSelectedCard } from './main.js'
 
 // Function to extract and return the project ID from the URL path
 function getProjectId() {
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 export function saveProject() {
     const projectId = getProjectId();
-
+    
     // Create project data
     const projectData = [];
     
@@ -65,7 +65,7 @@ export function saveProject() {
 
 function loadProject() {
     const projectId = getProjectId();
-
+    
     // Call the load endpoint to fetch the project data using the project id.
     fetch(`/load?id=${encodeURIComponent(projectId)}`, {
         method: "GET",
@@ -77,16 +77,35 @@ function loadProject() {
     .then(data => {
         console.log("Project loaded successfully:", data);
         // Process the loaded project data as needed.
-        // For example, iterate through the cards array and update the UI:
-        data.cards.forEach(card => {
-            console.log("Card data:", card);
-
-            // Create a new cad
-            let newCard = new Card(card.x,card.y);
-            newCard.update(card.imageSrc, card.prompt, card.creationDate);
-            cards.push(newCard);
-            redraw();
-        });
+        
+        if (data && data.cards) { // Project exists
+            data.cards.forEach(card => {
+                console.log("Card data:", card);
+                
+                // Create a new cad
+                let newCard = new Card(card.x,card.y);
+                newCard.update(card.imageSrc, card.prompt, card.creationDate);
+                cards.push(newCard);
+                // Redraw
+                newCard.image.onload = () => {
+                    redraw();
+                }
+            });
+        } else { // Project doesn't exist
+            // Add a default image
+            const defaultImage = new Image();
+            defaultImage.src = "images/default.png"; 
+            
+            // Create an initial card when the base image is loaded.
+            defaultImage.onload = () => {
+                if (cards.length === 0) {
+                    let card = new Card(100, 100);
+                    setSelectedCard(card);
+                    cards.push(card);
+                    redraw();
+                }
+            };          
+        }
     })
     .catch(error => {
         console.error("Error loading project:", error);

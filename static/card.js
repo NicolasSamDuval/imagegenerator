@@ -10,7 +10,7 @@ export class Card {
         this.width = 144;          // Card width (same as image width).
         this.height = this.imageSize + this.buttonHeight;
         this.image = new Image();
-        this.image.src = "image.png";
+        this.image.src = "images/default.png";
         this.prompt = '';
         this.creationDate = new Date();
     }
