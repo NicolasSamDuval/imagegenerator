@@ -1,0 +1,1 @@
+tail -f access.log | ccze -A
