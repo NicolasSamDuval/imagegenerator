@@ -31,6 +31,7 @@ sudo docker ps
 ### In mongo shell:
 ```
 mongosh
+sudo docker exec -it mongodb mongosh
 use myprojects_db
 db.createCollection("projects")
 db.projects.insertOne({ sample: "data" })
