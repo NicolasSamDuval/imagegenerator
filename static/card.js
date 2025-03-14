@@ -37,58 +37,71 @@ export class Card {
         ctx.save();
         ctx.translate(this.x, this.y);
         
-        const radius = 10; // Adjust this value for more or less rounded corners
+        const cardRadius = 10; // Card corner radius
     
-        // Create a rounded rectangle path.
+        // Create a rounded rectangle path for the card.
         ctx.beginPath();
-        ctx.moveTo(radius, 0);
-        ctx.lineTo(this.width - radius, 0);
-        ctx.quadraticCurveTo(this.width, 0, this.width, radius);
-        ctx.lineTo(this.width, this.height - radius);
-        ctx.quadraticCurveTo(this.width, this.height, this.width - radius, this.height);
-        ctx.lineTo(radius, this.height);
-        ctx.quadraticCurveTo(0, this.height, 0, this.height - radius);
-        ctx.lineTo(0, radius);
-        ctx.quadraticCurveTo(0, 0, radius, 0);
+        ctx.moveTo(cardRadius, 0);
+        ctx.lineTo(this.width - cardRadius, 0);
+        ctx.quadraticCurveTo(this.width, 0, this.width, cardRadius);
+        ctx.lineTo(this.width, this.height - cardRadius);
+        ctx.quadraticCurveTo(this.width, this.height, this.width - cardRadius, this.height);
+        ctx.lineTo(cardRadius, this.height);
+        ctx.quadraticCurveTo(0, this.height, 0, this.height - cardRadius);
+        ctx.lineTo(0, cardRadius);
+        ctx.quadraticCurveTo(0, 0, cardRadius, 0);
         ctx.closePath();
     
-        // Fill and stroke the rounded rectangle.
+        // Fill and stroke the card background.
         ctx.fillStyle = "white";
         ctx.fill();
         ctx.strokeStyle = "black";
         ctx.stroke();
     
-        // Optionally, clip to the rounded rectangle so any content drawn afterward respects the rounded corners.
+        // Clip to the card's rounded boundaries.
         ctx.clip();
         
-        // Draw the image area inside the card.
+        // Draw the image area.
         ctx.drawImage(this.image, 0, 0, this.imageSize, this.imageSize);
         
-        // Define overlay dimensions.
+        // Define overlay dimensions for the button container.
         const overlayWidth = this.width * 0.8; // 80% of card width
         const overlayHeight = this.buttonHeight * 0.8; // slightly smaller for a neat look
         const overlayX = (this.width - overlayWidth) / 2;
-        const overlayY = this.imageSize - overlayHeight - 5; // closer to the bottom
+        const overlayY = this.imageSize - overlayHeight - 5; // positioned closer to the bottom
     
-        // Draw transparent black overlay.
+        // Helper function to draw a rounded rectangle.
+        function drawRoundedRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+    
+        // Draw the container as a rounded rectangle (no extra white border).
+        const containerRadius = 8; // Rounded container corner radius
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-        ctx.fillRect(overlayX, overlayY, overlayWidth, overlayHeight);
-        
-        // Set up text properties for buttons.
+        drawRoundedRect(ctx, overlayX, overlayY, overlayWidth, overlayHeight, containerRadius);
+        ctx.fill();
+    
+        // Set up text properties for the button symbols.
         ctx.font = "14px sans-serif";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = "white"; // white text for contrast
+        ctx.fillStyle = "white";
         
-        // Calculate button widths within the overlay.
+        // Calculate each button's area within the container.
         const buttonWidth = overlayWidth / 3;
         
-        // Draw Duplicate button (left section)
+        // Draw the symbols centered in each button area.
         ctx.fillText("+", overlayX + buttonWidth / 2 - 5, overlayY + overlayHeight / 2);
-        
-        // Draw Remove button (middle section)
         ctx.fillText("–", overlayX + buttonWidth + buttonWidth / 2 - 5, overlayY + overlayHeight / 2);
-        
-        // Draw Expand button (right section)
         ctx.fillText("!", overlayX + 2 * buttonWidth + buttonWidth / 2 - 5, overlayY + overlayHeight / 2);
         
         ctx.restore();
