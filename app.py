@@ -178,4 +178,12 @@ def load_project():
     return jsonify(project), 200
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    certificate_path = 'certs/local.pem'
+    private_key_path = 'certs/local-key.pem'
+    if os.path.exists('/home/ubuntu/certs/'):
+        certificate_path = '/home/ubuntu/certs/fullchain.pem'
+        private_key_path = '/home/ubuntu/certs/privkey.pem'
+
+        app.run(host='0.0.0.0', port=443, ssl_context=(certificate_path, private_key_path))
+    else:
+        app.run(debug=True)

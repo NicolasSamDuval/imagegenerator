@@ -38,5 +38,53 @@ show collections
 ```
 
 ## Run app
-python app.py
 
+### Locally (debug)
+```
+python app.py
+```
+
+### Server
+
+#### Run
+
+To run imagegen, use `authbind`:
+
+Install:
+```
+sudo apt install authbind
+```
+
+Enable port 443
+```
+sudo touch /etc/authbind/byport/443
+sudo chown ubuntu:ubuntu /etc/authbind/byport/443
+sudo chmod 755 /etc/authbind/byport/443
+```
+
+```bash
+authbind --deep python3 app.py >> output.log 2>&1
+```
+
+#### Certificates
+
+Install certbot
+```
+sudo apt-get install certbot
+```
+
+Run DNS challenge
+```
+sudo certbot certonly --manual --preferred-challenges=dns -d imagegen.ai-square.io
+```
+
+Add DNS TXT record on porkbun
+
+Copy the certs:
+```
+mkdir -p /home/ubuntu/certs
+sudo cp /etc/letsencrypt/live/imagegen.ai-square.io/fullchain.pem /home/ubuntu/certs/fullchain.pem
+sudo cp /etc/letsencrypt/live/imagegen.ai-square.io/privkey.pem /home/ubuntu/certs/privkey.pem
+sudo chown ubuntu:ubuntu /home/ubuntu/certs/fullchain.pem /home/ubuntu/certs/privkey.pem
+chmod 600 /home/ubuntu/certs/fullchain.pem /home/ubuntu/certs/privkey.pem
+ ```
