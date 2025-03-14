@@ -54,6 +54,7 @@ To run imagegen, use `authbind`:
 Install:
 ```
 sudo apt install authbind
+pip install gunicorn
 ```
 
 Enable port 443
@@ -64,7 +65,7 @@ sudo chmod 755 /etc/authbind/byport/443
 ```
 
 ```bash
-authbind --deep python3 app.py >> output.log 2>&1
+./run.sh
 ```
 
 #### Certificates

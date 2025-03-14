@@ -1,1 +1,1 @@
-authbind --deep python3 app.py
+authbind --deep gunicorn -b 0.0.0.0:443 -w 1 app:app --certfile=/home/ubuntu/certs/fullchain.pem --keyfile=/home/ubuntu/certs/privkey.pem
