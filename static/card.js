@@ -8,7 +8,7 @@ export class Card {
         this.imageSize = 144;      // Image drawn as a 144x144 square.
         this.buttonHeight = 30;    // Buttons area height.
         this.width = 144;          // Card width (same as image width).
-        this.height = this.imageSize + this.buttonHeight;
+        this.height = this.imageSize;
         this.image = new Image();
         this.image.src = "images/default.png";
         this.prompt = '';
@@ -37,42 +37,62 @@ export class Card {
         ctx.save();
         ctx.translate(this.x, this.y);
         
-        // Draw card background.
+        const radius = 10; // Adjust this value for more or less rounded corners
+    
+        // Create a rounded rectangle path.
+        ctx.beginPath();
+        ctx.moveTo(radius, 0);
+        ctx.lineTo(this.width - radius, 0);
+        ctx.quadraticCurveTo(this.width, 0, this.width, radius);
+        ctx.lineTo(this.width, this.height - radius);
+        ctx.quadraticCurveTo(this.width, this.height, this.width - radius, this.height);
+        ctx.lineTo(radius, this.height);
+        ctx.quadraticCurveTo(0, this.height, 0, this.height - radius);
+        ctx.lineTo(0, radius);
+        ctx.quadraticCurveTo(0, 0, radius, 0);
+        ctx.closePath();
+    
+        // Fill and stroke the rounded rectangle.
         ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, this.width, this.height);
+        ctx.fill();
         ctx.strokeStyle = "black";
-        ctx.strokeRect(0, 0, this.width, this.height);
+        ctx.stroke();
+    
+        // Optionally, clip to the rounded rectangle so any content drawn afterward respects the rounded corners.
+        ctx.clip();
         
-        // Draw the image area.
+        // Draw the image area inside the card.
         ctx.drawImage(this.image, 0, 0, this.imageSize, this.imageSize);
         
-        // Draw the buttons area (the bottom part).
-        ctx.fillStyle = "#ddd";
-        ctx.fillRect(0, this.imageSize, this.width, this.buttonHeight);
-        ctx.font = "16px sans-serif";
+        // Define overlay dimensions.
+        const overlayWidth = this.width * 0.8; // 80% of card width
+        const overlayHeight = this.buttonHeight * 0.8; // slightly smaller for a neat look
+        const overlayX = (this.width - overlayWidth) / 2;
+        const overlayY = this.imageSize - overlayHeight - 5; // closer to the bottom
+    
+        // Draw transparent black overlay.
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillRect(overlayX, overlayY, overlayWidth, overlayHeight);
+        
+        // Set up text properties for buttons.
+        ctx.font = "14px sans-serif";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = "black";
+        ctx.fillStyle = "white"; // white text for contrast
         
-        // Duplicate button (left third)
-        ctx.fillStyle = "lightgray";
-        ctx.fillRect(0, this.imageSize, this.width / 3, this.buttonHeight);
-        ctx.fillStyle = "black";
-        ctx.fillText("+", this.width / 6 - 5, this.imageSize + this.buttonHeight / 2);
+        // Calculate button widths within the overlay.
+        const buttonWidth = overlayWidth / 3;
         
-        // Remove button (middle third)
-        ctx.fillStyle = "lightgray";
-        ctx.fillRect(this.width / 3, this.imageSize, this.width / 3, this.buttonHeight);
-        ctx.fillStyle = "black";
-        ctx.fillText("–", this.width / 2 - 5, this.imageSize + this.buttonHeight / 2);
+        // Draw Duplicate button (left section)
+        ctx.fillText("+", overlayX + buttonWidth / 2 - 5, overlayY + overlayHeight / 2);
         
-        // Expand button (right third)
-        ctx.fillStyle = "lightgray";
-        ctx.fillRect((2 * this.width) / 3, this.imageSize, this.width / 3, this.buttonHeight);
-        ctx.fillStyle = "black";
-        ctx.fillText("!", (5 * this.width) / 6 - 5, this.imageSize + this.buttonHeight / 2);
+        // Draw Remove button (middle section)
+        ctx.fillText("–", overlayX + buttonWidth + buttonWidth / 2 - 5, overlayY + overlayHeight / 2);
+        
+        // Draw Expand button (right section)
+        ctx.fillText("!", overlayX + 2 * buttonWidth + buttonWidth / 2 - 5, overlayY + overlayHeight / 2);
         
         ctx.restore();
-    }
+    }     
     
     // Returns true if the point (px,py) is inside this card.
     isInside(px, py) {
@@ -83,13 +103,28 @@ export class Card {
     // If the point (px,py) falls within the button areas,
     // returns "duplicate", "remove", or "expand". Otherwise, returns null.
     buttonAt(px, py) {
+        // Convert global coordinates to local coordinates.
         let lx = px - this.x;
         let ly = py - this.y;
-        if (ly >= this.imageSize && ly <= this.imageSize + this.buttonHeight) {
-            if (lx >= 0 && lx < this.width / 3) return "duplicate";
-            if (lx >= this.width / 3 && lx < (2 * this.width) / 3) return "remove";
-            if (lx >= (2 * this.width) / 3 && lx <= this.width) return "expand";
+    
+        // Use the same overlay dimensions as in draw().
+        const overlayWidth = this.width * 0.8;
+        const overlayHeight = this.buttonHeight * 0.8;
+        const overlayX = (this.width - overlayWidth) / 2;
+        const overlayY = this.imageSize - overlayHeight - 5;
+    
+        // Check if the click falls within the overlay.
+        if (lx >= overlayX && lx <= overlayX + overlayWidth &&
+            ly >= overlayY && ly <= overlayY + overlayHeight) {
+            const buttonWidth = overlayWidth / 3;
+            if (lx < overlayX + buttonWidth) {
+                return "duplicate";
+            } else if (lx < overlayX + 2 * buttonWidth) {
+                return "remove";
+            } else {
+                return "expand";
+            }
         }
         return null;
-    }
+    }    
 }
