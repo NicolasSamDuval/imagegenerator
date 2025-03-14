@@ -18,6 +18,21 @@ let draggingCard = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
+// Dynamically set the canvas size.
+function resizeCanvas() {    
+    // Set canvas width to the full window width
+    canvas.width = window.innerWidth - 50;
+    // Set canvas height to the window height minus the prompt container height
+    canvas.height = window.innerHeight - 120;
+    
+    // Redraw the canvas with the new dimensions
+    redraw();
+}
+
+// Call resizeCanvas on load and when the window is resized.
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
 // --- Event Handling ---
 canvas.addEventListener("mousedown", async (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -49,7 +64,7 @@ canvas.addEventListener("mousedown", async (e) => {
                     // Prepare 4 prompt variations
                     const prompt = selectedCard.prompt;
                     const variations = await generatePromptVariations(prompt);
-
+                    
                     // Expand: create four new cards around this card.
                     const offset = 10;
                     let newCards = [];
@@ -60,7 +75,7 @@ canvas.addEventListener("mousedown", async (e) => {
                     cards.push(topCard, bottomCard, leftCard, rightCard);
                     newCards.push(topCard, bottomCard, leftCard, rightCard);
                     redraw();
-
+                    
                     // Generate 4 new images
                     for (let i = 0 ; i < newCards.length; i++) {
                         const card = newCards[i];
@@ -81,10 +96,10 @@ canvas.addEventListener("mousedown", async (e) => {
                             console.error("Error generating image:", err);
                         });
                     }
-
+                    
                     // Save project
                     saveProject();
-
+                    
                     return;
                 }
             }
@@ -110,19 +125,19 @@ canvas.addEventListener("mousemove", (e) => {
         draggingCard.y = my - dragOffsetY;
         redraw();
     }
-
+    
     // Hover logic
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
-
+    
     // If dragging, update the dragged card position.
     if (draggingCard) {
         draggingCard.x = mx - dragOffsetX;
         draggingCard.y = my - dragOffsetY;
         redraw();
     }
-
+    
     // Check if mouse is over a card (topmost first)
     let hoveredCard = null;
     for (let i = cards.length - 1; i >= 0; i--) {
@@ -131,7 +146,7 @@ canvas.addEventListener("mousemove", (e) => {
             break;
         }
     }
-
+    
     // Update tooltip element based on hovered card.
     const tooltip = document.getElementById("tooltip");
     if (hoveredCard && hoveredCard.prompt) {
@@ -188,7 +203,7 @@ rearrangeButton.addEventListener('click', () => {
     
     // Re-render the canvas with updated card positions
     redraw();
-
+    
     // Save project
     saveProject();
 });
@@ -200,7 +215,6 @@ export function redraw() {
         card.draw(ctx);
     });
 }
-
 
 import { generatePromptVariations, generateImage } from './imagegenerator.js';
 
@@ -223,7 +237,7 @@ generateBtn.addEventListener("click", () => {
                 redraw();
             }
             selectedCard.prompt = promptText;
-
+            
             // Save project
             saveProject();
         } else {
@@ -233,5 +247,3 @@ generateBtn.addEventListener("click", () => {
         console.error("Error generating image:", err);
     });
 });
-
-
