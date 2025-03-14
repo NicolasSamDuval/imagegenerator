@@ -61,10 +61,6 @@ canvas.addEventListener("mousedown", async (e) => {
                     redraw();
                     return;
                 } else if (button === "expand") {
-                    // Prepare 4 prompt variations
-                    const prompt = selectedCard.prompt;
-                    const variations = await generatePromptVariations(prompt);
-                    
                     // Expand: create four new cards around this card.
                     const offset = 10;
                     let newCards = [];
@@ -75,6 +71,10 @@ canvas.addEventListener("mousedown", async (e) => {
                     cards.push(topCard, bottomCard, leftCard, rightCard);
                     newCards.push(topCard, bottomCard, leftCard, rightCard);
                     redraw();
+
+                    // Prepare 4 prompt variations
+                    const prompt = selectedCard.prompt;
+                    const variations = await generatePromptVariations(prompt);
                     
                     // Generate 4 new images
                     for (let i = 0 ; i < newCards.length; i++) {
