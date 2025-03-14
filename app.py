@@ -7,6 +7,7 @@ import requests
 import fal_client
 from flask import Flask, request, jsonify, send_from_directory
 from pymongo import MongoClient
+from datetime import datetime
       
 # Read API keys
 from dotenv import load_dotenv
@@ -138,9 +139,13 @@ def generate():
 def serve_image(filename):
     return send_from_directory(IMAGES_DIR, filename)
 
+@app.route("/doc")
+def doc():
+    return app.send_static_file("doc.html")
+
 @app.route("/")
-def index():
-    return app.send_static_file("index.html")
+def home():
+    return app.send_static_file("home.html")
 
 # Mongodb routes
 @app.route('/save', methods=['POST'])
@@ -148,6 +153,7 @@ def save_project():
     """
     Save a project JSON document to MongoDB.
     The payload must include an "id" field to identify the project.
+    Sets the modification date when saving.
     """
     data = request.get_json()
     if not data:
@@ -156,6 +162,9 @@ def save_project():
     project_id = data.get("id")
     if not project_id:
         return jsonify({"error": "Project id is required in the JSON payload"}), 400
+
+    # Set the modification date to the current time (UTC)
+    data['modified'] = datetime.utcnow().isoformat()
 
     # Upsert the document using the project id
     projects_collection.update_one({"id": project_id}, {"$set": data}, upsert=True)
@@ -176,6 +185,29 @@ def load_project():
         return jsonify({"error": f"No project found with id {project_id}"}), 404
 
     return jsonify(project), 200
+
+@app.route('/list', methods=['GET'])
+def list_projects():
+    """
+    List all projects.
+    Each project is expected to include a "modified" field.
+    """
+    projects = list(projects_collection.find({}, {"_id": 0}))
+    return jsonify(projects), 200
+
+@app.route('/delete', methods=['DELETE'])
+def delete_project():
+    """
+    Delete a project by its id.
+    Expects a query parameter "id" for the project id.
+    """
+    project_id = request.args.get("id")
+    if not project_id:
+        return jsonify({"error": "Project id is required as a query parameter"}), 400
+    result = projects_collection.delete_one({"id": project_id})
+    if result.deleted_count == 0:
+        return jsonify({"error": f"No project found with id {project_id}"}), 404
+    return jsonify({"status": "success", "message": f"Project {project_id} deleted"}), 200
 
 if __name__ == "__main__":
     certificate_path = 'certs/local.pem'

@@ -39,3 +39,17 @@ canvas {
 #tooltip {
     max-width: 500px;
 }
+
+#project-lists-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1000; /* Ensures the button appears above the canvas */
+}

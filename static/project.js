@@ -1,5 +1,5 @@
 import { Card } from './card.js';
-import { redraw, cards, setSelectedCard } from './main.js'
+import { redraw, cards, setSelectedCard } from './doc.js'
 
 // Function to extract and return the project ID from the URL path
 function getProjectId() {

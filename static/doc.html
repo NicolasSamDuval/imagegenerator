@@ -7,7 +7,10 @@
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <canvas id="canvas" width="1000" height="1000"></canvas>
+    <!-- "Project Lists" button overlay -->
+    <button id="project-lists-btn" onclick="window.location.href='/'">Projects</button>
+    
+    <canvas id="canvas" width="1300" height="750"></canvas>
     
     <!-- Prompt container underneath the canvas -->
     <div id="prompt-container">
@@ -15,10 +18,10 @@
         <button id="generate-btn">Generate</button>
         <button id="rearrange-btn">Rearrange</button>
     </div>
-
-     <!-- Tooltip -->
+    
+    <!-- Tooltip -->
     <div id="tooltip" style="position: absolute; pointer-events: none; background: rgba(0,0,0,0.7); color: #fff; padding: 5px; border-radius: 3px; display: none;"></div>
     
-    <script type="module" src="main.js"></script>
+    <script type="module" src="project.js"></script>
 </body>
 </html>
