@@ -84,6 +84,7 @@ function loadProject() {
                 
                 // Create a new cad
                 let newCard = new Card(card.x,card.y);
+                setSelectedCard(card); // Set selection //FIXME: could save selection in project
                 newCard.update(card.imageSrc, card.prompt, card.creationDate);
                 cards.push(newCard);
                 // Redraw

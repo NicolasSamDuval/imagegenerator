@@ -18,6 +18,9 @@ client = openai
 
 fal_client.api_key = os.getenv("FAL_KEY")
 
+# Print the API key
+print("The API key is:", fal_client.api_key)
+
 # MongoDB connection
 mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 mongo_client = MongoClient(mongo_uri)
