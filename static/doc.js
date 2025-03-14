@@ -163,11 +163,13 @@ rearrangeButton.addEventListener('click', () => {
     // Sort cards by creation date (adjust sort order as needed)
     cards.sort((a, b) => a.creationDate - b.creationDate);
     
-    // Initialize starting position at the bottom left of the canvas
-    let x = 0;
-    // Assuming all cards have the same height; otherwise, you may need to compute the row height dynamically.
+    // Set a constant margin for the left and bottom offsets
+    const sideMargin = 10;
+    
+    // Initialize starting position at the bottom left of the canvas with a 10px margin
+    let x = sideMargin;
     let cardHeight = cards.length > 0 ? cards[0].height : 0;
-    let y = canvas.height - cardHeight;
+    let y = canvas.height - cardHeight - sideMargin;
     
     // Loop through sorted cards and assign new positions
     cards.forEach(card => {
@@ -179,7 +181,7 @@ rearrangeButton.addEventListener('click', () => {
         
         // If the next card would go off the canvas, reset x and move y one row up
         if (x + card.width > canvas.width) {
-            x = 0;
+            x = sideMargin;
             y -= card.height + margin;
         }
     });
