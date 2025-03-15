@@ -6,7 +6,7 @@ export class Card {
         this.y = y;
         // Card layout dimensions.
         this.imageSize = 144;      // Image drawn as a 144x144 square.
-        this.buttonHeight = 30;    // Buttons area height.
+        this.buttonHeight = 18;    // Buttons area height.
         this.width = 144;          // Card width (same as image width).
         this.height = this.imageSize;
         this.image = new Image();
@@ -80,10 +80,10 @@ export class Card {
         ctx.drawImage(this.image, 0, 0, this.imageSize, this.imageSize);
         
         // Define overlay dimensions for the button container.
-        const overlayWidth = this.width * 0.8; // 80% of card width
+        const overlayWidth = this.width * 0.4; // 40% of card width
         const overlayHeight = this.buttonHeight * 0.8; // slightly smaller for a neat look
-        const overlayX = (this.width - overlayWidth) / 2;
-        const overlayY = this.imageSize - overlayHeight - 5; // positioned closer to the bottom
+        const overlayX = this.width - overlayWidth - 5; // 5px from right edge
+        const overlayY = this.imageSize - overlayHeight - 5; // 5px from bottom
     
         // Helper function to draw a rounded rectangle.
         function drawRoundedRect(ctx, x, y, w, h, r) {
@@ -101,13 +101,13 @@ export class Card {
         }
     
         // Draw the container as a rounded rectangle (no extra white border).
-        const containerRadius = 8; // Rounded container corner radius
+        const containerRadius = 4; // Smaller radius for more compact look
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
         drawRoundedRect(ctx, overlayX, overlayY, overlayWidth, overlayHeight, containerRadius);
         ctx.fill();
     
         // Set up text properties for the button symbols.
-        ctx.font = "14px sans-serif";
+        ctx.font = "12px sans-serif"; // Smaller font size
         ctx.textBaseline = "middle";
         ctx.fillStyle = "white";
         
@@ -115,9 +115,9 @@ export class Card {
         const buttonWidth = overlayWidth / 3;
         
         // Draw the symbols centered in each button area.
-        ctx.fillText("+", overlayX + buttonWidth / 2 - 5, overlayY + overlayHeight / 2);
-        ctx.fillText("–", overlayX + buttonWidth + buttonWidth / 2 - 5, overlayY + overlayHeight / 2);
-        ctx.fillText("!", overlayX + 2 * buttonWidth + buttonWidth / 2 - 5, overlayY + overlayHeight / 2);
+        ctx.fillText("+", overlayX + buttonWidth / 2 - 4, overlayY + overlayHeight / 2);
+        ctx.fillText("–", overlayX + buttonWidth + buttonWidth / 2 - 4, overlayY + overlayHeight / 2);
+        ctx.fillText("!", overlayX + 2 * buttonWidth + buttonWidth / 2 - 4, overlayY + overlayHeight / 2);
         
         ctx.restore();
     }     
@@ -136,9 +136,9 @@ export class Card {
         let ly = py - this.y;
     
         // Use the same overlay dimensions as in draw().
-        const overlayWidth = this.width * 0.8;
+        const overlayWidth = this.width * 0.4; // 40% of card width
         const overlayHeight = this.buttonHeight * 0.8;
-        const overlayX = (this.width - overlayWidth) / 2;
+        const overlayX = this.width - overlayWidth - 5;
         const overlayY = this.imageSize - overlayHeight - 5;
     
         // Check if the click falls within the overlay.

@@ -91,9 +91,11 @@ canvas.addEventListener("mousedown", async (e) => {
                     let rightCard = new Card(card.x + card.width + offset, card.y);
                     cards.push(topCard, bottomCard, leftCard, rightCard);
                     newCards.push(topCard, bottomCard, leftCard, rightCard);
-                    setTimeout(() => {
-                        redraw();
-                    }, 150);
+
+                    // Set up image loading for each card first
+                    newCards.forEach(card => {
+                        card.image.onload = () => redraw();
+                    });
 
                     // Prepare 4 prompt variations
                     const prompt = selectedCard.prompt;
