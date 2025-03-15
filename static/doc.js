@@ -87,6 +87,8 @@ canvas.addEventListener("mousedown", async (e) => {
                                 // Redraw once the card's image is loaded.
                                 card.image.onload = () => {
                                     redraw();
+                                     // Save project
+                                    saveProject();
                                 }
                                 card.prompt = variation;
                             } else {
@@ -96,9 +98,6 @@ canvas.addEventListener("mousedown", async (e) => {
                             console.error("Error generating image:", err);
                         });
                     }
-                    
-                    // Save project
-                    saveProject();
                     
                     return;
                 }

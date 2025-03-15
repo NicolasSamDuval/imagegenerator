@@ -8,7 +8,16 @@ import fal_client
 from flask import Flask, request, jsonify, send_from_directory
 from pymongo import MongoClient
 from datetime import datetime
-      
+import time
+import logging
+
+# Log setup    
+logging.basicConfig(
+    level=logging.INFO,  # Set to DEBUG for more detailed logs
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()]  # Only log to standard output
+)
+
 # Read API keys
 from dotenv import load_dotenv
 load_dotenv()
@@ -20,7 +29,7 @@ client = openai
 fal_client.api_key = os.getenv("FAL_KEY")
 
 # Print the API key
-print("The API key is:", fal_client.api_key)
+logging.info(f"Using FAL API Key: {fal_client.api_key}")
 
 # MongoDB connection
 mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
@@ -38,9 +47,12 @@ def generate_variations():
     data = request.get_json()
     user_prompt = data.get("prompt", "")
     if not user_prompt:
+        logging.warning("Prompt is missing in request.")
         return jsonify({"error": "Prompt is required"}), 400
 
     try:
+        start_time = time.time()
+
         completion = client.chat.completions.create(
             model="gpt-4o",
             store=True,
@@ -59,6 +71,11 @@ def generate_variations():
                 }
             ]
         )
+
+        # Log time
+        end_time = time.time()
+        logging.info(f"Generated variations in {end_time - start_time:.2f} seconds.")
+
         # Get the text response and remove markdown formatting if present.
         text = completion.choices[0].message.content.strip()
         # Use regex to extract the JSON content between ```json and ```.
@@ -74,66 +91,78 @@ def generate_variations():
 def on_queue_update(update):
     if isinstance(update, fal_client.InProgress):
         for log in update.logs:
-            print(log["message"])
+            logging.info(log["message"])
 
 @app.route('/generate', methods=['POST'])
 def generate():
     data = request.get_json()
     if not data or 'prompt' not in data:
+        logging.warning("Missing prompt in /generate request.")
         return jsonify({'error': 'Prompt not provided'}), 400
 
     prompt = data['prompt']
+    logging.info(f"Generating image for prompt: {prompt}")
 
-    # Call fal_client with the given prompt
-    result = fal_client.subscribe(
-        "fal-ai/flux/schnell",
-        arguments={
-            "prompt": prompt,
-            "image_size":  {
-                "width": 144,
-                "height": 144
-            },
-            "num_inference_steps": 2,
-            "num_images": 1,
-            "enable_safety_checker": True
-        },
-        with_logs=True,
-        on_queue_update=on_queue_update,
-    )
-
-    # Extract the image URL from the result
-    # Expected result format:
-    # { "images": [ { "url": "https://v3.fal.media/files/panda/TWgr7EQamxzEmLqw5mxrT.png" } ] }
-    images_list = result.get('images')
-    if not images_list or len(images_list) == 0:
-        return jsonify({'error': 'No images returned from fal_client'}), 500
-
-    image_url = images_list[0].get('url')
-    if not image_url:
-        return jsonify({'error': 'Image URL not found in fal_client result'}), 500
-
-    # Download the image from the provided URL
     try:
-        response = requests.get(image_url)
-        response.raise_for_status()
+        # Call fal_client with the given prompt
+        result = fal_client.subscribe(
+            "fal-ai/flux/schnell",
+            arguments={
+                "prompt": prompt,
+                "image_size":  {
+                    "width": 144,
+                    "height": 144
+                },
+                "num_inference_steps": 2,
+                "num_images": 1,
+                "enable_safety_checker": True
+            },
+            with_logs=True,
+            on_queue_update=on_queue_update,
+        )
+
+        # Extract the image URL from the result
+        # Expected result format:
+        # { "images": [ { "url": "https://v3.fal.media/files/panda/TWgr7EQamxzEmLqw5mxrT.png" } ] }
+        images_list = result.get('images')
+        if not images_list or len(images_list) == 0:
+            logging.error('No images returned from fal_client')
+            return jsonify({'error': 'No images returned from fal_client'}), 500
+
+        image_url = images_list[0].get('url')
+        if not image_url:
+            logging.error('Image URL not found in fal_client result')
+            return jsonify({'error': 'Image URL not found in fal_client result'}), 500
+
+        logging.info(f"Downloading image from {image_url}")
+
+        # Download the image from the provided URL
+        try:
+            response = requests.get(image_url)
+            response.raise_for_status()
+        except Exception as e:
+            return jsonify({'error': 'Failed to download image', 'details': str(e)}), 500
+
+        image_data = response.content
+
+        # Generate a unique hash for the image and take the first 8 characters
+        image_hash = hashlib.sha256(image_data).hexdigest()[:8]
+        # Determine file extension from the URL (default to .jpg if not found)
+        ext = os.path.splitext(image_url)[1] or '.jpg'
+        filename = f"{image_hash}{ext}"
+        filepath = os.path.join(IMAGES_DIR, filename)
+
+        # Save the downloaded image to disk
+        with open(filepath, 'wb') as f:
+            f.write(image_data)
+
+        logging.info(f"Saved image as {filename}")
+
+        # Return the filename
+        return jsonify({'filename': filename})
     except Exception as e:
-        return jsonify({'error': 'Failed to download image', 'details': str(e)}), 500
-
-    image_data = response.content
-
-    # Generate a unique hash for the image and take the first 8 characters
-    image_hash = hashlib.sha256(image_data).hexdigest()[:8]
-    # Determine file extension from the URL (default to .jpg if not found)
-    ext = os.path.splitext(image_url)[1] or '.jpg'
-    filename = f"{image_hash}{ext}"
-    filepath = os.path.join(IMAGES_DIR, filename)
-
-    # Save the downloaded image to disk
-    with open(filepath, 'wb') as f:
-        f.write(image_data)
-
-    # Return the filename
-    return jsonify({'filename': filename})
+        logging.error(f"Error in /generate: {str(e)}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/images/<path:filename>')
 def serve_image(filename):
@@ -215,7 +244,8 @@ if __name__ == "__main__":
     if os.path.exists('/home/ubuntu/certs/'):
         certificate_path = '/home/ubuntu/certs/fullchain.pem'
         private_key_path = '/home/ubuntu/certs/privkey.pem'
-
+        logging.info("Running with SSL enabled.")
         app.run(host='0.0.0.0', port=443, ssl_context=(certificate_path, private_key_path))
     else:
+        logging.info("Running in debug mode (HTTP).")
         app.run(debug=True)
