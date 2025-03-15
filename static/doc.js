@@ -1,8 +1,10 @@
 import { Card } from './card.js';
 import { saveProject } from './project.js';
+import { generatePromptVariations, generateImage } from './imagegenerator.js';
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const promptInput = document.getElementById("prompt-input");
 
 // Global array of cards.
 export let cards = [];
@@ -17,6 +19,10 @@ export function setSelectedCard(card) {
 let draggingCard = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
+
+// Debounce timer for prompt input
+let debounceTimer = null;
+const DEBOUNCE_DELAY = 500; // 500ms delay
 
 // Dynamically set the canvas size.
 function resizeCanvas() {    
@@ -45,6 +51,9 @@ canvas.addEventListener("mousedown", async (e) => {
         if (card.isInside(mx, my)) {
             // Mark this card as selected.
             selectedCard = card;
+
+            // Update the prompt input with the selected card's prompt.
+            promptInput.value = card.prompt;
             
             // Check if a button was clicked.
             let button = card.buttonAt(mx, my);
@@ -215,34 +224,37 @@ export function redraw() {
     });
 }
 
-import { generatePromptVariations, generateImage } from './imagegenerator.js';
-
-const promptInput = document.getElementById("prompt-input");
-const generateBtn = document.getElementById("generate-btn");
-
-// Listen for clicks on the generate button.
-generateBtn.addEventListener("click", () => {
-    // Retrieve the prompt entered by the user.
-    const promptText = promptInput.value.trim();
-    if (!promptText) return;
+// Listen for input events on the prompt input field.
+promptInput.addEventListener("input", () => {
+    // Clear any existing timer
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
     
-    // Generate a new image based on the prompt.
-    generateImage(promptText).then(generatedImage => {
-        // If a card is selected, update its image source.
-        if (selectedCard) {
-            selectedCard.image.src = `/images/${generatedImage}`;
-            // Redraw once the card's image is loaded.
-            selectedCard.image.onload = () => {
-                redraw();
+    // Set a new timer
+    debounceTimer = setTimeout(() => {
+        // Retrieve the prompt entered by the user.
+        const promptText = promptInput.value.trim();
+        if (!promptText) return;
+        
+        // Generate a new image based on the prompt.
+        generateImage(promptText).then(generatedImage => {
+            // If a card is selected, update its image source.
+            if (selectedCard) {
+                selectedCard.image.src = `/images/${generatedImage}`;
+                // Redraw once the card's image is loaded.
+                selectedCard.image.onload = () => {
+                    redraw();
+                }
+                selectedCard.prompt = promptText;
+                
+                // Save project
+                saveProject();
+            } else {
+                console.warn("No card is selected to update.");
             }
-            selectedCard.prompt = promptText;
-            
-            // Save project
-            saveProject();
-        } else {
-            console.warn("No card is selected to update.");
-        }
-    }).catch(err => {
-        console.error("Error generating image:", err);
-    });
+        }).catch(err => {
+            console.error("Error generating image:", err);
+        });
+    }, DEBOUNCE_DELAY);
 });
