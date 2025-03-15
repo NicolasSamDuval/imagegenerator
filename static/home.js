@@ -8,21 +8,29 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/list')
         .then(response => response.json())
         .then(projects => {
+            // Convert modified timestamps to numbers for proper sorting
+            projects.sort((a, b) => {
+                const timeA = a.modified ? new Date(a.modified).getTime() : 0;
+                const timeB = b.modified ? new Date(b.modified).getTime() : 0;
+                return timeB - timeA; // Sort descending (most recent first)
+            });
+            
             projectList.innerHTML = '';
             projects.forEach(project => {
                 const li = document.createElement('li');
-                const id = project.id;
+                const id = project.id || "Undefined";
                 const modified = project.modified ? new Date(project.modified).toLocaleString() : 'N/A';
+                
                 li.innerHTML = `<strong>ID:</strong> ${id} <br> <strong>Modified:</strong> ${modified}`;
                 
-                // Edit button now redirects to /doc?id=<project-id>
+                // Edit button redirects to /doc?id=<project-id>
                 const editBtn = document.createElement('button');
                 editBtn.textContent = 'Edit';
                 editBtn.onclick = () => {
                     window.location.href = `/doc?id=${id}`;
                 };
                 
-                // Delete button remains the same
+                // Delete button
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Delete';
                 deleteBtn.onclick = () => {
