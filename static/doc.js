@@ -13,7 +13,21 @@ export let cards = [];
 // Global variable to track the selected card.
 export let selectedCard = null;
 export function setSelectedCard(card) {
+    // Remove selected state from previous card if any
+    if (selectedCard) {
+        selectedCard.setSelected(false);
+    }
+    
+    // Set new selected card
     selectedCard = card;
+    
+    // Add selected state to new card if any
+    if (selectedCard) {
+        selectedCard.setSelected(true);
+    }
+
+     // Update the prompt input with the selected card's prompt.
+     promptInput.value = card.prompt;
 }
 
 // Global variables for dragging.
@@ -51,10 +65,7 @@ canvas.addEventListener("mousedown", async (e) => {
         let card = cards[i];
         if (card.isInside(mx, my)) {
             // Mark this card as selected.
-            selectedCard = card;
-
-            // Update the prompt input with the selected card's prompt.
-            promptInput.value = card.prompt;
+            setSelectedCard(card)
             
             // Check if a button was clicked.
             let button = card.buttonAt(mx, my);

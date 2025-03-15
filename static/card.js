@@ -13,6 +13,7 @@ export class Card {
         this.image.src = "images/default.png";
         this.prompt = '';
         this.creationDate = new Date();
+        this.selected = false;     // Track selected state
     }
 
     update(src, prompt, creationDate) {
@@ -55,8 +56,22 @@ export class Card {
         // Fill and stroke the card background.
         ctx.fillStyle = "white";
         ctx.fill();
-        ctx.strokeStyle = "black";
-        ctx.stroke();
+        
+        // Draw border with different styles based on selected state
+        if (this.selected) {
+            ctx.strokeStyle = "#007AFF";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            // Add glow effect
+            ctx.shadowColor = "rgba(0, 122, 255, 0.4)";
+            ctx.shadowBlur = 15;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        } else {
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
     
         // Clip to the card's rounded boundaries.
         ctx.clip();
@@ -140,4 +155,8 @@ export class Card {
         }
         return null;
     }    
+
+    setSelected(selected) {
+        this.selected = selected;
+    }
 }

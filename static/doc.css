@@ -98,3 +98,9 @@ canvas {
 #project-lists-btn:hover svg {
     transform: scale(1.1);
 }
+
+/* Style for selected cards */
+.card.selected {
+    border: 2px solid #007AFF;
+    box-shadow: 0 0 10px rgba(0, 122, 255, 0.3);
+}
