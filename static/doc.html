@@ -7,16 +7,20 @@
     <link rel="stylesheet" href="doc.css" />
 </head>
 <body>
-    <!-- "Project Lists" button overlay -->
-    <button id="project-lists-btn" onclick="window.location.href='/'">Projects</button>
-    
     <canvas id="canvas"></canvas>
     
-    <!-- Prompt container underneath the canvas -->
-    <div id="prompt-container">
+    <!-- Controls overlay -->
+    <div class="controls-overlay">
         <input type="text" id="prompt-input" placeholder="Enter image prompt" />
-        <button id="rearrange-btn">Rearrange</button>
+        <button id="rearrange-btn">Grid</button>
     </div>
+    
+    <!-- Home button -->
+    <button id="project-lists-btn" onclick="window.location.href='/'">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+    </button>
     
     <!-- Tooltip -->
     <div id="tooltip" style="position: absolute; pointer-events: none; background: rgba(0,0,0,0.7); color: #fff; padding: 5px; border-radius: 3px; display: none;"></div>

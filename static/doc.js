@@ -5,6 +5,7 @@ import { generatePromptVariations, generateImage } from './imagegenerator.js';
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const promptInput = document.getElementById("prompt-input");
+const rearrangeButton = document.getElementById('rearrange-btn');
 
 // Global array of cards.
 export let cards = [];
@@ -27,9 +28,9 @@ const DEBOUNCE_DELAY = 500; // 500ms delay
 // Dynamically set the canvas size.
 function resizeCanvas() {    
     // Set canvas width to the full window width
-    canvas.width = window.innerWidth - 50;
-    // Set canvas height to the window height minus the prompt container height
-    canvas.height = window.innerHeight - 120;
+    canvas.width = window.innerWidth;
+    // Set canvas height to the full window height
+    canvas.height = window.innerHeight;
     
     // Redraw the canvas with the new dimensions
     redraw();
@@ -179,7 +180,6 @@ canvas.addEventListener("mouseleave", () => {
 });
 
 // Rearrange logic
-const rearrangeButton = document.getElementById('rearrange-btn');
 const margin = 10; // spacing between cards
 
 rearrangeButton.addEventListener('click', () => {
