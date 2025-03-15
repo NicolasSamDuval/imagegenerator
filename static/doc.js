@@ -91,7 +91,9 @@ canvas.addEventListener("mousedown", async (e) => {
                     let rightCard = new Card(card.x + card.width + offset, card.y);
                     cards.push(topCard, bottomCard, leftCard, rightCard);
                     newCards.push(topCard, bottomCard, leftCard, rightCard);
-                    redraw();
+                    setTimeout(() => {
+                        redraw();
+                    }, 150);
 
                     // Prepare 4 prompt variations
                     const prompt = selectedCard.prompt;
