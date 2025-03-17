@@ -239,8 +239,6 @@ def delete_project():
     return jsonify({"status": "success", "message": f"Project {project_id} deleted"}), 200
 
 if __name__ == "__main__":
-    certificate_path = 'certs/local.pem'
-    private_key_path = 'certs/local-key.pem'
     if os.path.exists('/home/ubuntu/certs/'):
         certificate_path = '/home/ubuntu/certs/fullchain.pem'
         private_key_path = '/home/ubuntu/certs/privkey.pem'
