@@ -39,6 +39,9 @@ let dragOffsetY = 0;
 let debounceTimer = null;
 const DEBOUNCE_DELAY = 500; // 500ms delay
 
+// Track the previous position of the dragged card
+let previousCardPosition = { x: 0, y: 0, width: 0, height: 0 };
+
 // Dynamically set the canvas size.
 function resizeCanvas() {    
     // Set canvas width to the full window width
@@ -131,6 +134,15 @@ canvas.addEventListener("mousedown", async (e) => {
             draggingCard = card;
             dragOffsetX = mx - card.x;
             dragOffsetY = my - card.y;
+            
+            // Initialize the previous card position for redraw optimization
+            previousCardPosition = {
+                x: card.x,
+                y: card.y,
+                width: card.width,
+                height: card.height
+            };
+            
             // Bring this card to the front.
             cards.splice(i, 1);
             cards.push(card);
@@ -141,16 +153,6 @@ canvas.addEventListener("mousedown", async (e) => {
 });
 
 canvas.addEventListener("mousemove", (e) => {
-    if (draggingCard) {
-        const rect = canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-        draggingCard.x = mx - dragOffsetX;
-        draggingCard.y = my - dragOffsetY;
-        redraw();
-    }
-    
-    // Hover logic
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
@@ -159,7 +161,7 @@ canvas.addEventListener("mousemove", (e) => {
     if (draggingCard) {
         draggingCard.x = mx - dragOffsetX;
         draggingCard.y = my - dragOffsetY;
-        redraw();
+        redraw(draggingCard);
     }
     
     // Check if mouse is over a card (topmost first)
@@ -231,12 +233,113 @@ rearrangeButton.addEventListener('click', () => {
     saveProject();
 });
 
-// Redraw the entire canvas.
-export function redraw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    cards.forEach(card => {
-        card.draw(ctx);
-    });
+// Redraw the canvas
+export function redraw(movedCard = null) {
+    if (movedCard) {
+        // Partial redraw - only update affected areas
+        
+        // Calculate a bounding box that encompasses both the previous and current positions
+        const selectionPadding = 20; // Large padding to account for selection effects
+        
+        // Find the min/max coordinates to create a rectangle that covers both positions
+        const minX = Math.min(previousCardPosition.x, movedCard.x) - selectionPadding;
+        const minY = Math.min(previousCardPosition.y, movedCard.y) - selectionPadding;
+        const maxX = Math.max(
+            previousCardPosition.x + previousCardPosition.width,
+            movedCard.x + movedCard.width
+        ) + selectionPadding;
+        const maxY = Math.max(
+            previousCardPosition.y + previousCardPosition.height,
+            movedCard.y + movedCard.height
+        ) + selectionPadding;
+        
+        // Clear the entire area between previous and current positions
+        const clearWidth = maxX - minX;
+        const clearHeight = maxY - minY;
+        ctx.clearRect(minX, minY, clearWidth, clearHeight);
+        
+        // Store the current position for next time
+        previousCardPosition = {
+            x: movedCard.x,
+            y: movedCard.y,
+            width: movedCard.width,
+            height: movedCard.height
+        };
+        
+        // Track which cards need to be redrawn
+        const needsRedraw = new Set();
+        
+        // Function to check if a card intersects with a region
+        function cardIntersectsRegion(card, x, y, width, height, padding) {
+            return (card.x + card.width + padding >= x && 
+                    card.x - padding <= x + width && 
+                    card.y + card.height + padding >= y && 
+                    card.y - padding <= y + height);
+        }
+        
+        // Function to add a card and all intersecting cards recursively
+        function addCardAndIntersections(index) {
+            if (needsRedraw.has(index)) return; // Already processed
+            
+            const card = cards[index];
+            needsRedraw.add(index);
+            
+            // Check all other cards to see if they intersect with this one
+            for (let i = 0; i < cards.length; i++) {
+                if (i !== index && !needsRedraw.has(i)) {
+                    const otherCard = cards[i];
+                    
+                    // If the cards intersect, add the other card too
+                    if (cardIntersectsRegion(
+                        otherCard, 
+                        card.x - selectionPadding, 
+                        card.y - selectionPadding, 
+                        card.width + selectionPadding * 2, 
+                        card.height + selectionPadding * 2,
+                        selectionPadding
+                    )) {
+                        addCardAndIntersections(i);
+                    }
+                }
+            }
+        }
+        
+        // Start with cards that intersect with the cleared area
+        for (let i = 0; i < cards.length; i++) {
+            const card = cards[i];
+            
+            // Check if card intersects with the cleared area
+            if (cardIntersectsRegion(card, minX, minY, clearWidth, clearHeight, 0)) {
+                addCardAndIntersections(i);
+            }
+        }
+        
+        // Convert the Set to an array and sort by index to maintain z-order
+        const cardsToRedraw = Array.from(needsRedraw).sort((a, b) => a - b);
+        
+        // Draw the cards in their original order
+        for (let i = 0; i < cardsToRedraw.length; i++) {
+            cards[cardsToRedraw[i]].draw(ctx);
+        }
+    } else {
+        // Full redraw
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw all cards from bottom to top (lowest to highest z-index)
+        for (let i = 0; i < cards.length; i++) {
+            cards[i].draw(ctx);
+        }
+        
+        // Reset previous position tracking when doing a full redraw
+        if (cards.length > 0 && draggingCard) {
+            previousCardPosition = {
+                x: draggingCard.x,
+                y: draggingCard.y,
+                width: draggingCard.width,
+                height: draggingCard.height
+            };
+        }
+    }
 }
 
 // Listen for input events on the prompt input field.
